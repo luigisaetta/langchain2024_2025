@@ -11,7 +11,9 @@ import os
 from config import (
     TOP_K,
     TOP_N,
-    EMBED_MODEL,
+    EMBED_MODEL_TYPE,
+    OCI_EMBED_MODEL,
+    COHERE_EMBED_MODEL,
     ENABLE_TRACING,
     LANGCHAIN_PROJECT,
     ADD_RERANKER,
@@ -69,7 +71,12 @@ def print_configuration():
 
     logger.info("--------------------------------------------------")
     logger.info("Configuration used:")
-    logger.info(" Using %s for Embeddings...", EMBED_MODEL)
+    logger.info(" Embedding model type: %s", EMBED_MODEL_TYPE)
+
+    if EMBED_MODEL_TYPE == "OCI":
+        logger.info(" Using %s for Embeddings...", OCI_EMBED_MODEL)
+    if EMBED_MODEL_TYPE == "COHERE":
+        logger.info(" Using %s for Embeddings...", COHERE_EMBED_MODEL)
 
     if ADD_RERANKER:
         logger.info(" Added Cohere Reranker...")

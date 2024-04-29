@@ -26,9 +26,12 @@ CHUNK_OVERLAP = 50
 # OCI GenAI model used for Embeddings
 # to batch embedding with OCI
 # with Cohere embeddings max is 96
-EMBED_MODEL_TYPE = "OCI"
+# value: COHERE, OCI
+EMBED_MODEL_TYPE = "COHERE"
 EMBED_BATCH_SIZE = 90
-EMBED_MODEL = "cohere.embed-multilingual-v3.0"
+OCI_EMBED_MODEL = "cohere.embed-multilingual-v3.0"
+COHERE_EMBED_MODEL = "embed-multilingual-v3.0"
+
 ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
 # reranker

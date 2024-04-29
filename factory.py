@@ -11,7 +11,7 @@ import logging
 from langchain_community.vectorstores import FAISS
 
 # Cohere
-from langchain_cohere import ChatCohere, CohereRerank
+from langchain_cohere import ChatCohere, CohereRerank, CohereEmbeddings
 from langchain.retrievers import ContextualCompressionRetriever
 
 # to handle conversational memory
@@ -28,7 +28,9 @@ from oracle_chat_prompts import CONTEXT_Q_PROMPT, QA_PROMPT
 from utils import print_configuration
 
 from config import (
-    EMBED_MODEL,
+    EMBED_MODEL_TYPE,
+    OCI_EMBED_MODEL,
+    COHERE_EMBED_MODEL,
     ENDPOINT,
     COHERE_GENAI_MODEL,
     TEMPERATURE,
@@ -41,16 +43,36 @@ from config import (
 from config_private import COMPARTMENT_ID, COHERE_API_KEY
 
 
-def get_embed_model():
+#
+#
+#
+def check_value_in_list(value, values_list):
+    """
+    to check that we don't enter a not supported value
+    """
+    if value not in values_list:
+        raise ValueError(
+            "Value %s not valid: value must be in list %s", value, str(values_list)
+        )
+
+
+def get_embed_model(model_type="OCI"):
     """
     get the Embeddings Model
     """
-    embed_model = OCIGenAIEmbeddingsWithBatch(
-        auth_type="API_KEY",
-        model_id=EMBED_MODEL,
-        service_endpoint=ENDPOINT,
-        compartment_id=COMPARTMENT_ID,
-    )
+    check_value_in_list(model_type, ["OCI", "COHERE"])
+
+    if model_type == "OCI":
+        embed_model = OCIGenAIEmbeddingsWithBatch(
+            auth_type="API_KEY",
+            model_id=OCI_EMBED_MODEL,
+            service_endpoint=ENDPOINT,
+            compartment_id=COMPARTMENT_ID,
+        )
+    if model_type == "COHERE":
+        embed_model = CohereEmbeddings(
+            model=COHERE_EMBED_MODEL, cohere_api_key=COHERE_API_KEY
+        )
     return embed_model
 
 
@@ -104,7 +126,7 @@ def get_rag_chain(local_index_dir, books_dir, verbose):
     # print all the used configuration to the console
     print_configuration()
 
-    embed_model = get_embed_model()
+    embed_model = get_embed_model(EMBED_MODEL_TYPE)
 
     v_store = get_vector_store(local_index_dir, books_dir, embed_model)
 
