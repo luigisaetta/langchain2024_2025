@@ -9,12 +9,14 @@ from glob import glob
 from tqdm.auto import tqdm
 
 from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.vectorstores import OpenSearchVectorSearch
 
-from factory import get_embed_model, get_vector_store
+from factory import get_embed_model
 from chunk_index_utils import get_recursive_text_splitter
 from utils import get_console_logger
 
-from config import BOOKS_DIR
+from config import BOOKS_DIR, OPENSEARCH_URL
+from config_private import OPENSEARCH_PWD
 
 logger = get_console_logger()
 
@@ -29,13 +31,25 @@ docs = []
 for book in tqdm(books_list):
     loader = PyPDFLoader(file_path=book)
 
-    # docs += loader.load_and_split(text_splitter=text_splitter)
+    docs += loader.load_and_split(text_splitter=text_splitter)
 
 logger.info("Loaded %s chunks...", len(docs))
 
 embed_model = get_embed_model(model_type="OCI")
 
-docsearch = get_vector_store("OPENSEARCH", embed_model, None, None)
+docsearch = OpenSearchVectorSearch.from_documents(
+    docs,
+    embedding=embed_model,
+    opensearch_url=OPENSEARCH_URL,
+    http_auth=("lsaetta", OPENSEARCH_PWD),
+    use_ssl=True,
+    verify_certs=False,
+    ssl_assert_hostname=False,
+    ssl_show_warn=False,
+    bulk_size=5000,
+    index_name="test1",
+    engine="faiss",
+)
 
 # test
 QUERY = "La metformina può essere usata per curare il diabete di tipo 2 nei pazienti anziani?"

@@ -43,7 +43,12 @@ from config import (
     COHERE_RERANKER_MODEL,
     OPENSEARCH_URL,
 )
-from config_private import COMPARTMENT_ID, COHERE_API_KEY, OPENSEARCH_PWD
+from config_private import (
+    COMPARTMENT_ID,
+    COHERE_API_KEY,
+    OPENSEARCH_USER,
+    OPENSEARCH_PWD,
+)
 
 
 #
@@ -87,7 +92,7 @@ def get_llm():
 #
 # get the Vector Store
 #
-def get_vector_store(vector_store_type, local_index_dir, books_dir, embed_model):
+def get_vector_store(vector_store_type, embed_model, local_index_dir, books_dir):
     """
     Read or rebuild the index and retur a Vector Store
     """
@@ -110,8 +115,8 @@ def get_vector_store(vector_store_type, local_index_dir, books_dir, embed_model)
         v_store = OpenSearchVectorSearch(
             embedding_function=embed_model,
             opensearch_url=OPENSEARCH_URL,
-            http_auth=("admin", OPENSEARCH_PWD),
-            use_ssl=False,
+            http_auth=(OPENSEARCH_USER, OPENSEARCH_PWD),
+            use_ssl=True,
             verify_certs=False,
             ssl_assert_hostname=False,
             ssl_show_warn=False,
@@ -142,9 +147,9 @@ def get_rag_chain(local_index_dir, books_dir, verbose):
 
     v_store = get_vector_store(
         vector_store_type=VECTOR_STORE_TYPE,
+        embed_model=embed_model,
         local_index_dir=local_index_dir,
         books_dir=books_dir,
-        embed_model=embed_model,
     )
 
     base_retriever = v_store.as_retriever(k=TOP_K)

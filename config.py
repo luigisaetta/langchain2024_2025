@@ -47,6 +47,7 @@ TOP_N = 4
 VECTOR_STORE_TYPE = "OPENSEARCH"
 
 # OPENSEARCH
+# using local as docker
 OPENSEARCH_URL = "https://localhost:9200"
 
 # parametri per leggere il database FAISS

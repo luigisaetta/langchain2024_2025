@@ -72,6 +72,7 @@ def print_configuration():
     logger.info("--------------------------------------------------")
     logger.info("Configuration used:")
     logger.info("")
+
     logger.info(" Embedding model type: %s", EMBED_MODEL_TYPE)
 
     if EMBED_MODEL_TYPE == "OCI":
@@ -83,10 +84,11 @@ def print_configuration():
         logger.info(" Added Cohere Reranker...")
         logger.info(" Using %s as reranker...", COHERE_RERANKER_MODEL)
 
+    logger.info(" Using %s as Vector Store...", VECTOR_STORE_TYPE)
     logger.info(" Retrieval parameters:")
     logger.info("    TOP_K: %s", TOP_K)
     logger.info("    TOP_N: %s", TOP_N)
-    logger.info(" Using %s as Vector Store...", VECTOR_STORE_TYPE)
+
     logger.info(
         " Using %s, %s as Generative AI Model...", GENAI_MODEL_TYPE, COHERE_GENAI_MODEL
     )
