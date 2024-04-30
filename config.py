@@ -27,7 +27,7 @@ CHUNK_OVERLAP = 50
 # to batch embedding with OCI
 # with Cohere embeddings max is 96
 # value: COHERE, OCI
-EMBED_MODEL_TYPE = "COHERE"
+EMBED_MODEL_TYPE = "OCI"
 EMBED_BATCH_SIZE = 90
 OCI_EMBED_MODEL = "cohere.embed-multilingual-v3.0"
 COHERE_EMBED_MODEL = "embed-multilingual-v3.0"
@@ -43,7 +43,11 @@ TOP_K = 6
 TOP_N = 4
 
 # Vector Store
-VECTOR_STORE_TYPE = "FAISS"
+# VECTOR_STORE_TYPE = "FAISS"
+VECTOR_STORE_TYPE = "OPENSEARCH"
+
+# OPENSEARCH
+OPENSEARCH_URL = "https://localhost:9200"
 
 # parametri per leggere il database FAISS
 BOOKS_DIR = "./books"

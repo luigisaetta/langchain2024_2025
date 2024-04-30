@@ -1,7 +1,7 @@
 """
 Author: Luigi Saetta
 Date created: 2024-04-27
-Date last modified: 2024-04-28
+Date last modified: 2024-04-30
 Python Version: 3.11
 """
 
@@ -9,6 +9,7 @@ import os
 import logging
 
 from langchain_community.vectorstores import FAISS
+from langchain_community.vectorstores import OpenSearchVectorSearch
 
 # Cohere
 from langchain_cohere import ChatCohere, CohereRerank, CohereEmbeddings
@@ -25,13 +26,14 @@ from oci_cohere_embeddings_utils import OCIGenAIEmbeddingsWithBatch
 # prompts
 from oracle_chat_prompts import CONTEXT_Q_PROMPT, QA_PROMPT
 
-from utils import print_configuration
+from utils import print_configuration, check_value_in_list
 
 from config import (
     EMBED_MODEL_TYPE,
     OCI_EMBED_MODEL,
     COHERE_EMBED_MODEL,
     ENDPOINT,
+    VECTOR_STORE_TYPE,
     COHERE_GENAI_MODEL,
     TEMPERATURE,
     MAX_TOKENS,
@@ -39,21 +41,14 @@ from config import (
     TOP_N,
     ADD_RERANKER,
     COHERE_RERANKER_MODEL,
+    OPENSEARCH_URL,
 )
-from config_private import COMPARTMENT_ID, COHERE_API_KEY
+from config_private import COMPARTMENT_ID, COHERE_API_KEY, OPENSEARCH_PWD
 
 
 #
 #
 #
-def check_value_in_list(value, values_list):
-    """
-    to check that we don't enter a not supported value
-    """
-    if value not in values_list:
-        raise ValueError(
-            "Value %s not valid: value must be in list %s", value, str(values_list)
-        )
 
 
 def get_embed_model(model_type="OCI"):
@@ -78,7 +73,7 @@ def get_embed_model(model_type="OCI"):
 
 def get_llm():
     """
-    todo
+    Build and return the LLM client
     """
     llm = ChatCohere(
         cohere_api_key=COHERE_API_KEY,
@@ -92,21 +87,38 @@ def get_llm():
 #
 # get the Vector Store
 #
-def get_vector_store(local_index_dir, books_dir, embed_model):
+def get_vector_store(vector_store_type, local_index_dir, books_dir, embed_model):
     """
-    todo
+    Read or rebuild the index and retur a Vector Store
     """
     logger = logging.getLogger("ConsoleLogger")
 
-    if os.path.exists(local_index_dir):
-        logger.info("Loading Vector Store from local dir %s...", local_index_dir)
+    check_value_in_list(vector_store_type, ["FAISS", "OPENSEARCH"])
 
-        v_store = FAISS.load_local(
-            local_index_dir, embed_model, allow_dangerous_deserialization=True
+    if vector_store_type == "FAISS":
+        if os.path.exists(local_index_dir):
+            logger.info("Loading Vector Store from local dir %s...", local_index_dir)
+
+            v_store = FAISS.load_local(
+                local_index_dir, embed_model, allow_dangerous_deserialization=True
+            )
+            logger.info("Loaded %s chunks of text !!!", v_store.index.ntotal)
+        else:
+            load_and_rebuild_faiss_index(local_index_dir, books_dir, embed_model)
+
+    if vector_store_type == "OPENSEARCH":
+        v_store = OpenSearchVectorSearch(
+            embedding_function=embed_model,
+            opensearch_url=OPENSEARCH_URL,
+            http_auth=("admin", OPENSEARCH_PWD),
+            use_ssl=False,
+            verify_certs=False,
+            ssl_assert_hostname=False,
+            ssl_show_warn=False,
+            bulk_size=5000,
+            index_name="test1",
+            engine="faiss",
         )
-        logger.info("Loaded %s chunks of text !!!", v_store.index.ntotal)
-    else:
-        load_and_rebuild_faiss_index(local_index_dir, books_dir, embed_model)
 
     return v_store
 
@@ -128,7 +140,12 @@ def get_rag_chain(local_index_dir, books_dir, verbose):
 
     embed_model = get_embed_model(EMBED_MODEL_TYPE)
 
-    v_store = get_vector_store(local_index_dir, books_dir, embed_model)
+    v_store = get_vector_store(
+        vector_store_type=VECTOR_STORE_TYPE,
+        local_index_dir=local_index_dir,
+        books_dir=books_dir,
+        embed_model=embed_model,
+    )
 
     base_retriever = v_store.as_retriever(k=TOP_K)
 

@@ -71,6 +71,7 @@ def print_configuration():
 
     logger.info("--------------------------------------------------")
     logger.info("Configuration used:")
+    logger.info("")
     logger.info(" Embedding model type: %s", EMBED_MODEL_TYPE)
 
     if EMBED_MODEL_TYPE == "OCI":
@@ -95,6 +96,16 @@ def print_configuration():
 
     logger.info("--------------------------------------------------")
     logger.info("")
+
+
+def check_value_in_list(value, values_list):
+    """
+    to check that we don't enter a not supported value
+    """
+    if value not in values_list:
+        raise ValueError(
+            f"Value {value} is not valid: value must be in list {values_list}"
+        )
 
 
 def answer(chain, question):

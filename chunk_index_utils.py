@@ -1,18 +1,18 @@
 """
 Author: Luigi Saetta
 Date created: 2024-04-27
-Date last modified: 2024-04-27
+Date last modified: 2024-04-30
 Python Version: 3.11
 
-Usage: contains the unction to split in chunks and create the index
+Usage: contains the functions to split in chunks and create the index
 """
 
 from glob import glob
 from tqdm.auto import tqdm
 
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from utils import get_console_logger
 
