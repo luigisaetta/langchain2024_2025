@@ -21,12 +21,19 @@ Warnings:
     This module is in development, may change in future versions.
 """
 
+import os
 import time
+import tempfile
 import streamlit as st
 from langchain_core.messages import HumanMessage, AIMessage
 
-from factory import get_rag_chain
-from utils import get_console_logger, enable_tracing
+from factory import get_rag_chain, get_embed_model
+from chunk_index_utils import (
+    load_book_and_split,
+    add_docs_to_faiss,
+    add_docs_to_opensearch,
+)
+from utils import get_console_logger, enable_tracing, remove_path_from_ref
 
 #
 # Configs
@@ -40,6 +47,8 @@ from config import (
     TITLE,
     ADD_REFERENCES,
     DO_STREAMING,
+    VECTOR_STORE_TYPE,
+    EMBED_MODEL_TYPE,
 )
 
 # Constant
@@ -68,13 +77,14 @@ def create_chat_engine(verbose=VERBOSE):
     return get_rag_chain(FAISS_DIR, BOOKS_DIR, verbose=verbose)
 
 
-def format_references(docs):
+def format_references(v_docs):
     """
     format the references to add at the end of response
     """
     references = "\n\nReferences:\n\n"
-    for doc in docs:
-        references += f"- {doc.metadata['source']}, pag: {doc.metadata['page']}\n"
+    for doc in v_docs:
+        ref_name = remove_path_from_ref(doc.metadata["source"])
+        references += f"- {ref_name}, pag: {doc.metadata['page']}\n"
     return references
 
 
@@ -137,6 +147,37 @@ def display_msg_on_rerun(chat_hist):
             st.markdown(message["content"])
 
 
+def write_temporary_file(tmp_dir, v_uploaded_file):
+    """
+    Write the uploaded file as a temporary file
+    """
+    temp_file_path = os.path.join(tmp_dir, v_uploaded_file.name)
+
+    with open(temp_file_path, "wb") as f:
+        f.write(v_uploaded_file.getbuffer())
+
+    return temp_file_path
+
+
+def load_uploaded_file_in_vector_store(v_uploaded_file):
+    """
+    load the uploaded file in the Vector Store and index
+    """
+    with tempfile.TemporaryDirectory() as tmp_dir_name:
+        # write a temporary file with the content
+        temp_file_path = write_temporary_file(tmp_dir_name, v_uploaded_file)
+
+        # prepare for loading
+        docs = load_book_and_split(temp_file_path)
+
+        embed_model = get_embed_model(EMBED_MODEL_TYPE)
+
+        if VECTOR_STORE_TYPE == "FAISS":
+            add_docs_to_faiss(docs, FAISS_DIR, embed_model)
+        if VECTOR_STORE_TYPE == "OPENSEARCH":
+            add_docs_to_opensearch(docs, embed_model)
+
+
 #
 # Main
 #
@@ -155,7 +196,26 @@ if ENABLE_TRACING:
 st.title(TITLE)
 
 # Added reset button
-st.button("Clear Chat History", on_click=reset_conversation)
+if st.sidebar.button("Clear Chat History"):
+    reset_conversation()
+
+
+# to load other pdf
+uploaded_file = st.sidebar.file_uploader(
+    label="Upload files", type=["pdf"], accept_multiple_files=False
+)
+
+if uploaded_file:
+    logger.info("Loading %s in the Vector Store...", uploaded_file.name)
+
+    load_uploaded_file_in_vector_store(uploaded_file)
+
+    logger.info("Loaded !")
+
+    # reload the rag_chain (do we need?)
+    rag_chain = get_rag_chain(FAISS_DIR, BOOKS_DIR, verbose=False)
+
+    uploaded_file = None
 
 # Initialize chat history
 if "chat_history" not in st.session_state:
@@ -165,7 +225,6 @@ if "chat_history" not in st.session_state:
 with st.spinner("Initializing RAG chain..."):
     # here we create the query engine
     rag_chain = create_chat_engine(verbose=VERBOSE)
-
 
 # Display chat messages from history on app rerun
 display_msg_on_rerun(st.session_state.chat_history)

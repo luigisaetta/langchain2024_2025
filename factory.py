@@ -109,7 +109,9 @@ def get_vector_store(vector_store_type, embed_model, local_index_dir, books_dir)
             )
             logger.info("Loaded %s chunks of text !!!", v_store.index.ntotal)
         else:
-            load_and_rebuild_faiss_index(local_index_dir, books_dir, embed_model)
+            v_store = load_and_rebuild_faiss_index(
+                local_index_dir, books_dir, embed_model
+            )
 
     if vector_store_type == "OPENSEARCH":
         v_store = OpenSearchVectorSearch(

@@ -25,6 +25,31 @@ from config import (
 from config_private import LANGSMITH_API_KEY
 
 
+def remove_path_from_ref(ref_pathname):
+    """
+    remove the path from source (ref)
+    """
+    ref = ref_pathname
+    if len(ref_pathname.split(os.sep)) > 0:
+        ref = ref_pathname.split(os.sep)[-1]
+
+    return ref
+
+
+def load_configuration():
+    """
+    read the configuration from config and return a configs dictionary
+    """
+    configs = {}
+    configs["VECTOR_STORE_TYPE"] = VECTOR_STORE_TYPE
+    configs["EMBED_MODEL_TYPE"] = EMBED_MODEL_TYPE
+    configs["OCI_EMBED_MODEL"] = OCI_EMBED_MODEL
+    configs["COHERE_EMBED_MODEL"] = COHERE_EMBED_MODEL
+    configs["GENAI_MODEL_TYPE"] = GENAI_MODEL_TYPE
+
+    return configs
+
+
 def enable_tracing():
     """
     To enable tracing with LangSmith

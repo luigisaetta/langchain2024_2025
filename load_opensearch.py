@@ -5,35 +5,18 @@ Date last modified: 2024-04-30
 Python Version: 3.11
 """
 
-from glob import glob
-from tqdm.auto import tqdm
-
-from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import OpenSearchVectorSearch
 
 from factory import get_embed_model
-from chunk_index_utils import get_recursive_text_splitter
+from chunk_index_utils import load_books_and_split
 from utils import get_console_logger
 
 from config import BOOKS_DIR, OPENSEARCH_URL
-from config_private import OPENSEARCH_PWD
+from config_private import OPENSEARCH_USER, OPENSEARCH_PWD
 
 logger = get_console_logger()
 
-logger.info("Loading documents from %s...", BOOKS_DIR)
-
-text_splitter = get_recursive_text_splitter()
-
-books_list = glob(BOOKS_DIR + "/*.pdf")
-
-docs = []
-
-for book in tqdm(books_list):
-    loader = PyPDFLoader(file_path=book)
-
-    docs += loader.load_and_split(text_splitter=text_splitter)
-
-logger.info("Loaded %s chunks...", len(docs))
+docs = load_books_and_split(BOOKS_DIR)
 
 embed_model = get_embed_model(model_type="OCI")
 
@@ -41,7 +24,7 @@ docsearch = OpenSearchVectorSearch.from_documents(
     docs,
     embedding=embed_model,
     opensearch_url=OPENSEARCH_URL,
-    http_auth=("lsaetta", OPENSEARCH_PWD),
+    http_auth=(OPENSEARCH_USER, OPENSEARCH_PWD),
     use_ssl=True,
     verify_certs=False,
     ssl_assert_hostname=False,

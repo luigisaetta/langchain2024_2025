@@ -9,7 +9,7 @@ Python Version: 3.11
 TOKENIZER = "Cohere/Cohere-embed-multilingual-v3.0"
 
 # title for the UI
-TITLE = "AI Assistant with LangChain"
+TITLE = "AI Assistant with LangChain 🦜"
 HELLO_MSG = "Ciao, come posso aiutarti?"
 
 ADD_REFERENCES = True
