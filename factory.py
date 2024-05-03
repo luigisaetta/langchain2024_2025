@@ -21,6 +21,7 @@ from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 
 from chunk_index_utils import load_and_rebuild_faiss_index
+from oracle_vector_db_lc import OracleVectorStore
 from oci_cohere_embeddings_utils import OCIGenAIEmbeddingsWithBatch
 
 # prompts
@@ -42,6 +43,10 @@ from config import (
     ADD_RERANKER,
     COHERE_RERANKER_MODEL,
     OPENSEARCH_URL,
+    OPENSEARCH_INDEX_NAME,
+    LLM_MODEL_TYPE,
+    COLLECTION_NAME,
+    VERBOSE,
 )
 from config_private import (
     COMPARTMENT_ID,
@@ -76,16 +81,19 @@ def get_embed_model(model_type="OCI"):
     return embed_model
 
 
-def get_llm():
+def get_llm(model_type):
     """
     Build and return the LLM client
     """
-    llm = ChatCohere(
-        cohere_api_key=COHERE_API_KEY,
-        model=COHERE_GENAI_MODEL,
-        max_tokens=MAX_TOKENS,
-        temperature=TEMPERATURE,
-    )
+    check_value_in_list(model_type, ["OCI", "COHERE"])
+
+    if model_type == "COHERE":
+        llm = ChatCohere(
+            cohere_api_key=COHERE_API_KEY,
+            model=COHERE_GENAI_MODEL,
+            max_tokens=MAX_TOKENS,
+            temperature=TEMPERATURE,
+        )
     return llm
 
 
@@ -98,7 +106,7 @@ def get_vector_store(vector_store_type, embed_model, local_index_dir, books_dir)
     """
     logger = logging.getLogger("ConsoleLogger")
 
-    check_value_in_list(vector_store_type, ["FAISS", "OPENSEARCH"])
+    check_value_in_list(vector_store_type, ["FAISS", "OPENSEARCH", "AI23C"])
 
     if vector_store_type == "FAISS":
         if os.path.exists(local_index_dir):
@@ -114,6 +122,9 @@ def get_vector_store(vector_store_type, embed_model, local_index_dir, books_dir)
             )
 
     if vector_store_type == "OPENSEARCH":
+        # this assumes that there is an OpenSearch cluster available
+        # at the specified URL
+        # data already loaded in
         v_store = OpenSearchVectorSearch(
             embedding_function=embed_model,
             opensearch_url=OPENSEARCH_URL,
@@ -123,8 +134,13 @@ def get_vector_store(vector_store_type, embed_model, local_index_dir, books_dir)
             ssl_assert_hostname=False,
             ssl_show_warn=False,
             bulk_size=5000,
-            index_name="test1",
+            index_name=OPENSEARCH_INDEX_NAME,
             engine="faiss",
+        )
+
+    if vector_store_type == "AI23C":
+        v_store = OracleVectorStore(
+            embedding=embed_model, collection_name=COLLECTION_NAME, verbose=VERBOSE
         )
 
     return v_store
@@ -172,7 +188,7 @@ def get_rag_chain(local_index_dir, books_dir, verbose):
         # no reranker
         retriever = base_retriever
 
-    llm = get_llm()
+    llm = get_llm(model_type=LLM_MODEL_TYPE)
 
     # 1. create a retriever using chat history
     history_aware_retriever = create_history_aware_retriever(

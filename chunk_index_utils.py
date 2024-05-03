@@ -16,7 +16,7 @@ from langchain_community.vectorstores import OpenSearchVectorSearch
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from utils import get_console_logger
-from config import CHUNK_SIZE, CHUNK_OVERLAP, OPENSEARCH_URL
+from config import CHUNK_SIZE, CHUNK_OVERLAP, OPENSEARCH_URL, OPENSEARCH_INDEX_NAME
 from config_private import OPENSEARCH_USER, OPENSEARCH_PWD
 
 
@@ -65,13 +65,15 @@ def add_docs_to_opensearch(docs, embed_model):
         ssl_assert_hostname=False,
         ssl_show_warn=False,
         bulk_size=5000,
-        index_name="test1",
+        index_name=OPENSEARCH_INDEX_NAME,
         engine="faiss",
     )
 
+    logger.info("Saving new documents to Vector Store...")
+
     v_store.add_documents(docs)
 
-    logger.info("Saved new book to Vector Store !")
+    logger.info("Saved new documents to Vector Store !")
 
 
 def add_docs_to_faiss(docs, faiss_dir, embed_model):

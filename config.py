@@ -42,13 +42,21 @@ COHERE_RERANKER_MODEL = "rerank-multilingual-v3.0"
 TOP_K = 6
 TOP_N = 4
 
+# Oracle VS
+EMBEDDINGS_BITS = 32
+
 # Vector Store
 # VECTOR_STORE_TYPE = "FAISS"
-VECTOR_STORE_TYPE = "OPENSEARCH"
+# VECTOR_STORE_TYPE = "OPENSEARCH"
+VECTOR_STORE_TYPE = "AI23C"
 
 # OPENSEARCH
 # using local as docker
 OPENSEARCH_URL = "https://localhost:9200"
+OPENSEARCH_INDEX_NAME = "test1"
+
+# AI23C
+COLLECTION_NAME = "ORACLE_KNOWLEDGE"
 
 # parametri per leggere il database FAISS
 BOOKS_DIR = "./books"
@@ -56,7 +64,7 @@ BOOKS_DIR = "./books"
 FAISS_DIR = "./faiss_index"
 
 # COHERE, OCI
-GENAI_MODEL_TYPE = "COHERE"
+LLM_MODEL_TYPE = "COHERE"
 # Cohere params
 COHERE_GENAI_MODEL = "command-r"
 

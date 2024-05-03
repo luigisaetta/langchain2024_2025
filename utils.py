@@ -19,7 +19,7 @@ from config import (
     ADD_RERANKER,
     COHERE_RERANKER_MODEL,
     VECTOR_STORE_TYPE,
-    GENAI_MODEL_TYPE,
+    LLM_MODEL_TYPE,
     COHERE_GENAI_MODEL,
 )
 from config_private import LANGSMITH_API_KEY
@@ -45,7 +45,9 @@ def load_configuration():
     configs["EMBED_MODEL_TYPE"] = EMBED_MODEL_TYPE
     configs["OCI_EMBED_MODEL"] = OCI_EMBED_MODEL
     configs["COHERE_EMBED_MODEL"] = COHERE_EMBED_MODEL
-    configs["GENAI_MODEL_TYPE"] = GENAI_MODEL_TYPE
+    configs["LLM_MODEL_TYPE"] = LLM_MODEL_TYPE
+    configs["TOP_K"] = TOP_K
+    configs["TOP_N"] = TOP_N
 
     return configs
 
@@ -115,7 +117,7 @@ def print_configuration():
     logger.info("    TOP_N: %s", TOP_N)
 
     logger.info(
-        " Using %s, %s as Generative AI Model...", GENAI_MODEL_TYPE, COHERE_GENAI_MODEL
+        " Using %s, %s as Generative AI Model...", LLM_MODEL_TYPE, COHERE_GENAI_MODEL
     )
     if ENABLE_TRACING:
         logger.info("")
