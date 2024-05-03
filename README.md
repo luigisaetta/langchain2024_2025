@@ -10,7 +10,7 @@ Here you'll find all the code to develop a RAG Knowledge Assistant
 * Support Cohere Embeddings and LLM (comand-r...)
 * Support OCI Generative AI Service
 * FAISS Vector Store
-* (30/04/2024) added OpenSearch as Vector Store
-* Oracle AI Vector Search (wip)
+* (30/04/2024) added **OpenSearch** as Vector Store
+* (03/05/2024) **Oracle AI Vector Search**
 
 
