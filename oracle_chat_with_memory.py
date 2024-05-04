@@ -164,6 +164,8 @@ def load_uploaded_file_in_vector_store(v_uploaded_file):
     load the uploaded file in the Vector Store and index
     """
     with tempfile.TemporaryDirectory() as tmp_dir_name:
+        logger = get_console_logger()
+
         # write a temporary file with the content
         temp_file_path = write_temporary_file(tmp_dir_name, v_uploaded_file)
 
@@ -176,6 +178,8 @@ def load_uploaded_file_in_vector_store(v_uploaded_file):
             add_docs_to_faiss(docs, FAISS_DIR, embed_model)
         if VECTOR_STORE_TYPE == "OPENSEARCH":
             add_docs_to_opensearch(docs, embed_model)
+        if VECTOR_STORE_TYPE == "AI23C":
+            logger.info("Functionality not yet implemented!")
 
 
 #

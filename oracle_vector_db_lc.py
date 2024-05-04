@@ -39,6 +39,7 @@ from __future__ import annotations
 import time
 import array
 import logging
+import traceback
 
 from typing import (
     Any,
@@ -308,7 +309,9 @@ class OracleVectorStore(VectorStore):
 
         embeddings = np.array(embeddings)
 
+        #
         # save in db
+        #
         tot_errors = 0
 
         dsn = make_dsn()
@@ -335,9 +338,28 @@ class OracleVectorStore(VectorStore):
                             values (:1, :2, :3, :4, :5)""",
                             [rec_id, chunk, input_array, ref, pag],
                         )
-                    except Exception as e:
-                        logging.error("Error in save embeddings...")
-                        logging.error(e)
+                    except oracledb.DatabaseError as e:
+                        logging.error(
+                            "Database error occurred while saving embeddings:"
+                        )
+                        logging.error("Error message: %s", e)
+                        logging.error("SQL Query: %s", cursor.statement)
+                        logging.error(
+                            "Parameters: %s %s %s %s %s",
+                            rec_id,
+                            chunk,
+                            input_array,
+                            ref,
+                            pag,
+                        )
+                        # Optionally roll back transaction here if necessary
+                        tot_errors += 1
+                    except oracledb.Error as e:
+                        logging.error(
+                            "An unexpected error occurred while saving embeddings:"
+                        )
+                        logging.error("Error message: %s", e)
+                        logging.error(traceback.format_exc())
                         tot_errors += 1
 
             connection.commit()
@@ -374,8 +396,9 @@ class OracleVectorStore(VectorStore):
 
                 connection.close()
 
-        except Exception as e:
-            logging.error("Error occurred in connection: %s", e)
+        except oracledb.DatabaseError as e:
+            logging.error("Error in test connection!")
+            logging.error("Error message: %s", e)
 
     @classmethod
     def create_collection(cls, collection_name: str):
