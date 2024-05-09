@@ -13,7 +13,7 @@ TITLE = "AI Assistant with LangChain 🦜"
 HELLO_MSG = "Ciao, come posso aiutarti?"
 
 ADD_REFERENCES = True
-VERBOSE = True
+VERBOSE = False
 
 # enable tracing with LangSmith
 ENABLE_TRACING = True
@@ -47,15 +47,15 @@ EMBEDDINGS_BITS = 32
 
 # Vector Store
 # VECTOR_STORE_TYPE = "FAISS"
-# VECTOR_STORE_TYPE = "OPENSEARCH"
-VECTOR_STORE_TYPE = "AI23C"
+VECTOR_STORE_TYPE = "OPENSEARCH"
+# VECTOR_STORE_TYPE = "23AI"
 
 # OPENSEARCH
 # using local as docker
 OPENSEARCH_URL = "https://localhost:9200"
 OPENSEARCH_INDEX_NAME = "test1"
 
-# AI23C
+# 23AI
 COLLECTION_NAME = "ORACLE_KNOWLEDGE"
 
 # parametri per leggere il database FAISS
@@ -76,4 +76,16 @@ MAX_TOKENS = 1024
 DO_STREAMING = True
 
 # for TRACING
-LANGCHAIN_PROJECT = "memory27042024-2"
+LANGCHAIN_PROJECT = "memory05052024-1"
+
+# Opensearch shared params
+OPENSEARCH_SHARED_PARAMS = {
+    "opensearch_url": OPENSEARCH_URL,
+    "use_ssl": True,
+    "verify_certs": False,
+    "ssl_assert_hostname": False,
+    "ssl_show_warn": False,
+    "bulk_size": 5000,
+    "index_name": OPENSEARCH_INDEX_NAME,
+    "engine": "faiss",
+}

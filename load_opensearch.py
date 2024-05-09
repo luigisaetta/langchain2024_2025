@@ -15,7 +15,7 @@ from factory import get_embed_model
 from chunk_index_utils import load_books_and_split
 from utils import get_console_logger
 
-from config import BOOKS_DIR, OPENSEARCH_URL, OPENSEARCH_INDEX_NAME
+from config import BOOKS_DIR, OPENSEARCH_SHARED_PARAMS
 from config_private import OPENSEARCH_USER, OPENSEARCH_PWD
 
 logger = get_console_logger()
@@ -29,15 +29,8 @@ embed_model = get_embed_model(model_type="OCI")
 docsearch = OpenSearchVectorSearch.from_documents(
     docs,
     embedding=embed_model,
-    opensearch_url=OPENSEARCH_URL,
     http_auth=(OPENSEARCH_USER, OPENSEARCH_PWD),
-    use_ssl=True,
-    verify_certs=False,
-    ssl_assert_hostname=False,
-    ssl_show_warn=False,
-    bulk_size=5000,
-    index_name=OPENSEARCH_INDEX_NAME,
-    engine="faiss",
+    **OPENSEARCH_SHARED_PARAMS
 )
 
 # Do a test

@@ -147,11 +147,11 @@ def display_msg_on_rerun(chat_hist):
             st.markdown(message["content"])
 
 
-def write_temporary_file(tmp_dir, v_uploaded_file):
+def write_temporary_file(v_tmp_dir_name, v_uploaded_file):
     """
     Write the uploaded file as a temporary file
     """
-    temp_file_path = os.path.join(tmp_dir, v_uploaded_file.name)
+    temp_file_path = os.path.join(v_tmp_dir_name, v_uploaded_file.name)
 
     with open(temp_file_path, "wb") as f:
         f.write(v_uploaded_file.getbuffer())
@@ -163,23 +163,23 @@ def load_uploaded_file_in_vector_store(v_uploaded_file):
     """
     load the uploaded file in the Vector Store and index
     """
-    with tempfile.TemporaryDirectory() as tmp_dir_name:
-        logger = get_console_logger()
+    logger = get_console_logger()
 
-        # write a temporary file with the content
+    # write a temporary file with the content
+    with tempfile.TemporaryDirectory() as tmp_dir_name:
         temp_file_path = write_temporary_file(tmp_dir_name, v_uploaded_file)
 
         # prepare for loading
         docs = load_book_and_split(temp_file_path)
 
-        embed_model = get_embed_model(EMBED_MODEL_TYPE)
+    embed_model = get_embed_model(EMBED_MODEL_TYPE)
 
-        if VECTOR_STORE_TYPE == "FAISS":
-            add_docs_to_faiss(docs, FAISS_DIR, embed_model)
-        if VECTOR_STORE_TYPE == "OPENSEARCH":
-            add_docs_to_opensearch(docs, embed_model)
-        if VECTOR_STORE_TYPE == "AI23C":
-            logger.info("Functionality not yet implemented!")
+    if VECTOR_STORE_TYPE == "FAISS":
+        add_docs_to_faiss(docs, FAISS_DIR, embed_model)
+    if VECTOR_STORE_TYPE == "OPENSEARCH":
+        add_docs_to_opensearch(docs, embed_model)
+    if VECTOR_STORE_TYPE == "23AI":
+        logger.info("Functionality not yet implemented!")
 
 
 #

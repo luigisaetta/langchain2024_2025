@@ -7,6 +7,7 @@ Python Version: 3.11
 Usage: contains the functions to split in chunks and create the index
 """
 
+import os
 from glob import glob
 from tqdm.auto import tqdm
 
@@ -44,6 +45,11 @@ def load_book_and_split(book_path):
     loader = PyPDFLoader(file_path=book_path)
 
     docs = loader.load_and_split(text_splitter=text_splitter)
+
+    # remove path from source
+    for doc in docs:
+        if os.path.sep in doc.metadata["source"]:
+            doc.metadata["source"] = doc.metadata["source"].split(os.path.sep)[-1]
 
     logger.info("Loaded %s chunks...", len(docs))
 
@@ -104,9 +110,11 @@ def load_books_and_split(books_dir) -> list:
 
     text_splitter = get_recursive_text_splitter()
 
-    books_list = glob(books_dir + "/*.pdf")
+    books_list = sorted(glob(books_dir + "/*.pdf"))
 
-    logger.info("Loading books: %s", books_list)
+    logger.info("Loading books: ")
+    for book in books_list:
+        logger.info("* %s", book)
 
     docs = []
 
@@ -115,7 +123,7 @@ def load_books_and_split(books_dir) -> list:
 
         docs += loader.load_and_split(text_splitter=text_splitter)
 
-    logger.info("Loaded %s chunks...", len(docs))
+    logger.info("Loaded %s chunks of text...", len(docs))
 
     return docs
 

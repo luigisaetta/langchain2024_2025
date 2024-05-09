@@ -30,6 +30,7 @@ def remove_path_from_ref(ref_pathname):
     remove the path from source (ref)
     """
     ref = ref_pathname
+    # check if / or \ is contained
     if len(ref_pathname.split(os.sep)) > 0:
         ref = ref_pathname.split(os.sep)[-1]
 
@@ -116,9 +117,10 @@ def print_configuration():
     logger.info("    TOP_K: %s", TOP_K)
     logger.info("    TOP_N: %s", TOP_N)
 
-    logger.info(
-        " Using %s, %s as Generative AI Model...", LLM_MODEL_TYPE, COHERE_GENAI_MODEL
-    )
+    logger.info(" Using %s as Generative Model type...", LLM_MODEL_TYPE)
+    if LLM_MODEL_TYPE == "COHERE":
+        logger.info(" Using %s for LLM...", COHERE_GENAI_MODEL)
+
     if ENABLE_TRACING:
         logger.info("")
         logger.info(" Enabled Observability with LangSmith...")

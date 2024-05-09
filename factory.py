@@ -21,7 +21,6 @@ from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 
 from chunk_index_utils import load_and_rebuild_faiss_index
-from oracle_vector_db_lc import OracleVectorStore
 from oci_cohere_embeddings_utils import OCIGenAIEmbeddingsWithBatch
 
 # prompts
@@ -42,11 +41,11 @@ from config import (
     TOP_N,
     ADD_RERANKER,
     COHERE_RERANKER_MODEL,
-    OPENSEARCH_URL,
-    OPENSEARCH_INDEX_NAME,
     LLM_MODEL_TYPE,
     COLLECTION_NAME,
     VERBOSE,
+    # shared params for opensearch
+    OPENSEARCH_SHARED_PARAMS,
 )
 from config_private import (
     COMPARTMENT_ID,
@@ -106,7 +105,7 @@ def get_vector_store(vector_store_type, embed_model, local_index_dir, books_dir)
     """
     logger = logging.getLogger("ConsoleLogger")
 
-    check_value_in_list(vector_store_type, ["FAISS", "OPENSEARCH", "AI23C"])
+    check_value_in_list(vector_store_type, ["FAISS", "OPENSEARCH", "23AI"])
 
     if vector_store_type == "FAISS":
         if os.path.exists(local_index_dir):
@@ -123,25 +122,18 @@ def get_vector_store(vector_store_type, embed_model, local_index_dir, books_dir)
 
     if vector_store_type == "OPENSEARCH":
         # this assumes that there is an OpenSearch cluster available
+        # or docker
         # at the specified URL
         # data already loaded in
         v_store = OpenSearchVectorSearch(
             embedding_function=embed_model,
-            opensearch_url=OPENSEARCH_URL,
             http_auth=(OPENSEARCH_USER, OPENSEARCH_PWD),
-            use_ssl=True,
-            verify_certs=False,
-            ssl_assert_hostname=False,
-            ssl_show_warn=False,
-            bulk_size=5000,
-            index_name=OPENSEARCH_INDEX_NAME,
-            engine="faiss",
+            **OPENSEARCH_SHARED_PARAMS
         )
 
-    if vector_store_type == "AI23C":
-        v_store = OracleVectorStore(
-            embedding=embed_model, collection_name=COLLECTION_NAME, verbose=VERBOSE
-        )
+    if vector_store_type == "23AI":
+        # not yet implemented
+        v_store = None
 
     return v_store
 
