@@ -1,7 +1,7 @@
 """
 Author: Luigi Saetta
 Date created: 2024-04-27
-Date last modified: 2024-04-30
+Date last modified: 2024-05-09
 Python Version: 3.11
 """
 
@@ -10,6 +10,7 @@ import logging
 
 from langchain_community.vectorstores import FAISS
 from langchain_community.vectorstores import OpenSearchVectorSearch
+from langchain_community.llms import OCIGenAI
 
 # Cohere
 from langchain_cohere import ChatCohere, CohereRerank, CohereEmbeddings
@@ -35,6 +36,7 @@ from config import (
     ENDPOINT,
     VECTOR_STORE_TYPE,
     COHERE_GENAI_MODEL,
+    OCI_GENAI_MODEL,
     TEMPERATURE,
     MAX_TOKENS,
     TOP_K,
@@ -92,6 +94,14 @@ def get_llm(model_type):
             model=COHERE_GENAI_MODEL,
             max_tokens=MAX_TOKENS,
             temperature=TEMPERATURE,
+        )
+    if model_type == "OCI":
+        llm = OCIGenAI(
+            auth_type="API_KEY",
+            model_id=OCI_GENAI_MODEL,
+            service_endpoint=ENDPOINT,
+            compartment_id=COMPARTMENT_ID,
+            model_kwargs={"max_tokens": MAX_TOKENS, "temperature": TEMPERATURE},
         )
     return llm
 
@@ -182,13 +192,15 @@ def get_rag_chain(local_index_dir, books_dir, verbose):
 
     llm = get_llm(model_type=LLM_MODEL_TYPE)
 
+    # steps to add chat_history
     # 1. create a retriever using chat history
     history_aware_retriever = create_history_aware_retriever(
         llm, retriever, CONTEXT_Q_PROMPT
     )
 
     # 2. create the chain for answering
-    # we need to use a different prompt
+    # we need to use a different prompt from the one used to
+    # condense the standalone question
     question_answer_chain = create_stuff_documents_chain(llm, QA_PROMPT)
 
     # 3, the entire chain

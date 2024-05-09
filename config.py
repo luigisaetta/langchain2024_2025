@@ -56,6 +56,7 @@ OPENSEARCH_URL = "https://localhost:9200"
 OPENSEARCH_INDEX_NAME = "test1"
 
 # 23AI
+# the name of the table with text and embeddings
 COLLECTION_NAME = "ORACLE_KNOWLEDGE"
 
 # parametri per leggere il database FAISS
@@ -64,16 +65,19 @@ BOOKS_DIR = "./books"
 FAISS_DIR = "./faiss_index"
 
 # COHERE, OCI
-LLM_MODEL_TYPE = "COHERE"
+LLM_MODEL_TYPE = "OCI"
 # Cohere params
 COHERE_GENAI_MODEL = "command-r"
+# OCI
+OCI_GENAI_MODEL = "cohere.command"
+# OCI_GENAI_MODEL = "meta.llama-2-70b-chat"
 
 # params for LLM
 TEMPERATURE = 0.1
 MAX_TOKENS = 1024
 
 # to enable streaming
-DO_STREAMING = True
+DO_STREAMING = False
 
 # for TRACING
 LANGCHAIN_PROJECT = "memory05052024-1"

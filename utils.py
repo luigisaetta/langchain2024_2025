@@ -21,6 +21,7 @@ from config import (
     VECTOR_STORE_TYPE,
     LLM_MODEL_TYPE,
     COHERE_GENAI_MODEL,
+    OCI_GENAI_MODEL,
 )
 from config_private import LANGSMITH_API_KEY
 
@@ -120,6 +121,8 @@ def print_configuration():
     logger.info(" Using %s as Generative Model type...", LLM_MODEL_TYPE)
     if LLM_MODEL_TYPE == "COHERE":
         logger.info(" Using %s for LLM...", COHERE_GENAI_MODEL)
+    if LLM_MODEL_TYPE == "OCI":
+        logger.info(" Using %s for LLM...", OCI_GENAI_MODEL)
 
     if ENABLE_TRACING:
         logger.info("")
