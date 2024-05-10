@@ -32,6 +32,7 @@ EMBED_BATCH_SIZE = 90
 OCI_EMBED_MODEL = "cohere.embed-multilingual-v3.0"
 COHERE_EMBED_MODEL = "embed-multilingual-v3.0"
 
+# current endpoint for OCI GenAI (embed and llm) models
 ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
 # reranker
@@ -47,13 +48,17 @@ EMBEDDINGS_BITS = 32
 
 # Vector Store
 # VECTOR_STORE_TYPE = "FAISS"
-VECTOR_STORE_TYPE = "OPENSEARCH"
+# VECTOR_STORE_TYPE = "OPENSEARCH"
 # VECTOR_STORE_TYPE = "23AI"
+VECTOR_STORE_TYPE = "QDRANT"
 
 # OPENSEARCH
 # using local as docker
 OPENSEARCH_URL = "https://localhost:9200"
 OPENSEARCH_INDEX_NAME = "test1"
+
+# QDRANT local
+QDRANT_URL = "http://localhost:6333"
 
 # 23AI
 # the name of the table with text and embeddings

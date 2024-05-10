@@ -1,7 +1,7 @@
 """
 Author: Luigi Saetta
 Date created: 2024-04-27
-Date last modified: 2024-05-09
+Date last modified: 2024-05-10
 Python Version: 3.11
 """
 
@@ -10,6 +10,8 @@ import logging
 
 from langchain_community.vectorstores import FAISS
 from langchain_community.vectorstores import OpenSearchVectorSearch
+from qdrant_client import QdrantClient
+from langchain_community.vectorstores import Qdrant
 from langchain_community.llms import OCIGenAI
 
 # Cohere
@@ -46,6 +48,7 @@ from config import (
     LLM_MODEL_TYPE,
     COLLECTION_NAME,
     VERBOSE,
+    QDRANT_URL,
     # shared params for opensearch
     OPENSEARCH_SHARED_PARAMS,
 )
@@ -115,7 +118,7 @@ def get_vector_store(vector_store_type, embed_model, local_index_dir, books_dir)
     """
     logger = logging.getLogger("ConsoleLogger")
 
-    check_value_in_list(vector_store_type, ["FAISS", "OPENSEARCH", "23AI"])
+    check_value_in_list(vector_store_type, ["FAISS", "OPENSEARCH", "23AI", "QDRANT"])
 
     if vector_store_type == "FAISS":
         if os.path.exists(local_index_dir):
@@ -142,8 +145,14 @@ def get_vector_store(vector_store_type, embed_model, local_index_dir, books_dir)
         )
 
     if vector_store_type == "23AI":
-        # not yet implemented
+        # TODO not yet implemented
         v_store = None
+
+    # 10/05: added qdrant
+    if vector_store_type == "QDRANT":
+        client = QdrantClient(url=QDRANT_URL)
+        collection_name = COLLECTION_NAME
+        v_store = Qdrant(client, collection_name, embeddings=embed_model)
 
     return v_store
 
@@ -172,6 +181,7 @@ def get_rag_chain(local_index_dir, books_dir, verbose):
         books_dir=books_dir,
     )
 
+    # 10/05: I can add a filter here (for ex: to filter by profile_id)
     base_retriever = v_store.as_retriever(k=TOP_K)
 
     # add the reranker

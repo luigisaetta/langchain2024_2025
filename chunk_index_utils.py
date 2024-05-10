@@ -7,7 +7,6 @@ Python Version: 3.11
 Usage: contains the functions to split in chunks and create the index
 """
 
-import os
 from glob import glob
 from tqdm.auto import tqdm
 
@@ -16,7 +15,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_community.vectorstores import OpenSearchVectorSearch
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from utils import get_console_logger
+from utils import get_console_logger, remove_path_from_ref
 from config import CHUNK_SIZE, CHUNK_OVERLAP, OPENSEARCH_URL, OPENSEARCH_INDEX_NAME
 from config_private import OPENSEARCH_USER, OPENSEARCH_PWD
 
@@ -48,8 +47,7 @@ def load_book_and_split(book_path):
 
     # remove path from source
     for doc in docs:
-        if os.path.sep in doc.metadata["source"]:
-            doc.metadata["source"] = doc.metadata["source"].split(os.path.sep)[-1]
+        doc.metadata["source"] = remove_path_from_ref(doc.metadata["source"])
 
     logger.info("Loaded %s chunks...", len(docs))
 
