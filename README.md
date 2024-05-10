@@ -14,6 +14,7 @@ Here you'll find all the code to develop a RAG Knowledge Assistant
 * Support Cohere Embeddings and LLM (comand-r...)
 * Support **OCI Generative AI** Service
 * Support for local **FAISS** Vector Store
+* Support for local **QDRANT** Vector Store
 * (30/04/2024) added **OpenSearch** as Vector Store
 
 
