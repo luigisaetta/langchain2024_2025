@@ -7,11 +7,15 @@ Python Version: 3.11
 
 import os
 import logging
+import oracledb
 
 from langchain_community.vectorstores import FAISS
 from langchain_community.vectorstores import OpenSearchVectorSearch
 from qdrant_client import QdrantClient
 from langchain_community.vectorstores import Qdrant
+from langchain_community.vectorstores import oraclevs
+from langchain_community.vectorstores.oraclevs import OracleVS
+from langchain_community.vectorstores.utils import DistanceStrategy
 from langchain_community.llms import OCIGenAI
 
 # Cohere
@@ -57,6 +61,10 @@ from config_private import (
     COHERE_API_KEY,
     OPENSEARCH_USER,
     OPENSEARCH_PWD,
+    DB_USER,
+    DB_PWD,
+    DB_HOST_IP,
+    DB_SERVICE,
 )
 
 
@@ -141,12 +149,20 @@ def get_vector_store(vector_store_type, embed_model, local_index_dir, books_dir)
         v_store = OpenSearchVectorSearch(
             embedding_function=embed_model,
             http_auth=(OPENSEARCH_USER, OPENSEARCH_PWD),
-            **OPENSEARCH_SHARED_PARAMS
+            **OPENSEARCH_SHARED_PARAMS,
         )
 
     if vector_store_type == "23AI":
-        # TODO not yet implemented
-        v_store = None
+        dsn = f"{DB_HOST_IP}:1521/{DB_SERVICE}"
+
+        connection = oracledb.connect(user=DB_USER, password=DB_PWD, dsn=dsn)
+
+        v_store = OracleVS(
+            client=connection,
+            table_name="ORACLE_KNOWLEDGE",
+            distance_strategy=DistanceStrategy.COSINE,
+            embedding_function=embed_model,
+        )
 
     # 10/05: added qdrant
     if vector_store_type == "QDRANT":
