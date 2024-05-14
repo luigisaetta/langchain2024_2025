@@ -16,5 +16,5 @@ Here you'll find all the code to develop a RAG Knowledge Assistant
 * Support for local **FAISS** Vector Store
 * Support for local **QDRANT** Vector Store
 * (30/04/2024) added **OpenSearch** as Vector Store
-
+* (14/05) Oracle AI Vector Search
 
