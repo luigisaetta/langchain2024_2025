@@ -163,7 +163,6 @@ def load_uploaded_file_in_vector_store(v_uploaded_file):
     """
     load the uploaded file in the Vector Store and index
     """
-    logger = get_console_logger()
 
     # write a temporary file with the content
     with tempfile.TemporaryDirectory() as tmp_dir_name:

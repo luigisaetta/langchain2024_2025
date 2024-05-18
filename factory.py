@@ -13,7 +13,6 @@ from langchain_community.vectorstores import FAISS
 from langchain_community.vectorstores import OpenSearchVectorSearch
 from qdrant_client import QdrantClient
 from langchain_community.vectorstores import Qdrant
-from langchain_community.vectorstores import oraclevs
 from langchain_community.vectorstores.oraclevs import OracleVS
 from langchain_community.vectorstores.utils import DistanceStrategy
 from langchain_community.llms import OCIGenAI
@@ -51,7 +50,6 @@ from config import (
     COHERE_RERANKER_MODEL,
     LLM_MODEL_TYPE,
     COLLECTION_NAME,
-    VERBOSE,
     QDRANT_URL,
     # shared params for opensearch
     OPENSEARCH_SHARED_PARAMS,

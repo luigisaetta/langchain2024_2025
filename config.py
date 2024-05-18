@@ -35,8 +35,9 @@ COHERE_EMBED_MODEL = "embed-multilingual-v3.0"
 # current endpoint for OCI GenAI (embed and llm) models
 ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
-# reranker
+# reranker, TRue only to experiment
 ADD_RERANKER = True
+# only to experiment
 COHERE_RERANKER_MODEL = "rerank-multilingual-v3.0"
 
 # retriever
@@ -82,7 +83,7 @@ TEMPERATURE = 0.1
 MAX_TOKENS = 1024
 
 # to enable streaming
-DO_STREAMING = False
+DO_STREAMING = True
 
 # for TRACING
 LANGCHAIN_PROJECT = "memory05052024-1"
