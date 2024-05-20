@@ -50,8 +50,8 @@ EMBEDDINGS_BITS = 32
 # Vector Store
 # VECTOR_STORE_TYPE = "FAISS"
 # VECTOR_STORE_TYPE = "OPENSEARCH"
-VECTOR_STORE_TYPE = "23AI"
-# VECTOR_STORE_TYPE = "QDRANT"
+# VECTOR_STORE_TYPE = "23AI"
+VECTOR_STORE_TYPE = "QDRANT"
 
 # OPENSEARCH
 # using local as docker
@@ -75,15 +75,15 @@ LLM_MODEL_TYPE = "COHERE"
 # Cohere params
 COHERE_GENAI_MODEL = "command-r"
 # OCI
-OCI_GENAI_MODEL = "cohere.command"
-# OCI_GENAI_MODEL = "meta.llama-2-70b-chat"
+# OCI_GENAI_MODEL = "cohere.command"
+OCI_GENAI_MODEL = "meta.llama-2-70b-chat"
 
 # params for LLM
 TEMPERATURE = 0.1
 MAX_TOKENS = 1024
 
 # to enable streaming
-DO_STREAMING = True
+DO_STREAMING = False
 
 # for TRACING
 LANGCHAIN_PROJECT = "memory05052024-1"
