@@ -9,15 +9,31 @@ Usage: contains the functions to split in chunks and create the index
 
 from glob import glob
 from tqdm.auto import tqdm
+import oracledb
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
 from langchain_community.vectorstores import OpenSearchVectorSearch
+from langchain_community.vectorstores.oraclevs import OracleVS
+from langchain_community.vectorstores.utils import DistanceStrategy
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from utils import get_console_logger, remove_path_from_ref
-from config import CHUNK_SIZE, CHUNK_OVERLAP, OPENSEARCH_URL, OPENSEARCH_INDEX_NAME
-from config_private import OPENSEARCH_USER, OPENSEARCH_PWD
+from config import (
+    CHUNK_SIZE,
+    CHUNK_OVERLAP,
+    OPENSEARCH_URL,
+    OPENSEARCH_INDEX_NAME,
+    COLLECTION_NAME,
+)
+from config_private import (
+    OPENSEARCH_USER,
+    OPENSEARCH_PWD,
+    DB_USER,
+    DB_PWD,
+    DB_HOST_IP,
+    DB_SERVICE,
+)
 
 
 def get_recursive_text_splitter():
@@ -52,6 +68,35 @@ def load_book_and_split(book_path):
     logger.info("Loaded %s chunks...", len(docs))
 
     return docs
+
+
+def add_docs_to_23ai(docs, embed_model):
+    """
+    add docs from a book to Oracle vector store
+    """
+    logger = get_console_logger()
+
+    try:
+        dsn = f"{DB_HOST_IP}:1521/{DB_SERVICE}"
+
+        connection = oracledb.connect(user=DB_USER, password=DB_PWD, dsn=dsn)
+
+        v_store = OracleVS(
+            client=connection,
+            table_name=COLLECTION_NAME,
+            distance_strategy=DistanceStrategy.COSINE,
+            embedding_function=embed_model,
+        )
+
+        logger.info("Saving new documents to Vector Store...")
+
+        v_store.add_documents(docs)
+
+        logger.info("Saved new documents to Vector Store !")
+
+    except oracledb.Error as e:
+        err_msg = "An error occurred in add_docs_to_23ai: " + str(e)
+        logger.error(err_msg)
 
 
 def add_docs_to_opensearch(docs, embed_model):

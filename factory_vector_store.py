@@ -5,7 +5,7 @@ Date last modified: 2024-05-20
 
 Usage:
     This module handles the creation of the Vector Store 
-    used in the RAG chain, vased on config
+    used in the RAG chain, based on config
 
 Python Version: 3.11
 """
@@ -42,13 +42,18 @@ from config_private import (
 )
 
 
-def get_vector_store(vector_store_type, embed_model, local_index_dir, books_dir):
+def get_vector_store(
+    vector_store_type, embed_model, local_index_dir=None, books_dir=None
+):
     """
-    Read or rebuild the index and retur a Vector Store
+    local_index_dir, books_dir only needed for FAISS
+    Faiss: Read or rebuild the index and retur a Vector Store
     """
     logger = logging.getLogger("ConsoleLogger")
 
     check_value_in_list(vector_store_type, ["FAISS", "OPENSEARCH", "23AI", "QDRANT"])
+
+    v_store = None
 
     if vector_store_type == "FAISS":
         if os.path.exists(local_index_dir):
@@ -62,34 +67,37 @@ def get_vector_store(vector_store_type, embed_model, local_index_dir, books_dir)
             v_store = load_and_rebuild_faiss_index(
                 local_index_dir, books_dir, embed_model
             )
-
-    if vector_store_type == "OPENSEARCH":
+    elif vector_store_type == "OPENSEARCH":
         # this assumes that there is an OpenSearch cluster available
-        # or docker
-        # at the specified URL
-        # data already loaded in
+        # or docker, at the specified URL
+        # txt+vectors already loaded in
         v_store = OpenSearchVectorSearch(
             embedding_function=embed_model,
             http_auth=(OPENSEARCH_USER, OPENSEARCH_PWD),
             **OPENSEARCH_SHARED_PARAMS,
         )
-
-    if vector_store_type == "23AI":
+    elif vector_store_type == "23AI":
         dsn = f"{DB_HOST_IP}:1521/{DB_SERVICE}"
 
-        connection = oracledb.connect(user=DB_USER, password=DB_PWD, dsn=dsn)
+        try:
+            connection = oracledb.connect(user=DB_USER, password=DB_PWD, dsn=dsn)
 
-        v_store = OracleVS(
-            client=connection,
-            table_name="ORACLE_KNOWLEDGE",
-            distance_strategy=DistanceStrategy.COSINE,
-            embedding_function=embed_model,
-        )
+            v_store = OracleVS(
+                client=connection,
+                table_name=COLLECTION_NAME,
+                distance_strategy=DistanceStrategy.COSINE,
+                embedding_function=embed_model,
+            )
+        except oracledb.Error as e:
+            err_msg = "An error occurred in get_vector_store: " + str(e)
+            logger.error(err_msg)
 
     # 10/05: added qdrant
-    if vector_store_type == "QDRANT":
+    elif vector_store_type == "QDRANT":
         client = QdrantClient(url=QDRANT_URL)
-        collection_name = COLLECTION_NAME
-        v_store = Qdrant(client, collection_name, embeddings=embed_model)
+
+        v_store = Qdrant(
+            client, collection_name=COLLECTION_NAME, embeddings=embed_model
+        )
 
     return v_store

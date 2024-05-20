@@ -32,6 +32,7 @@ from chunk_index_utils import (
     load_book_and_split,
     add_docs_to_faiss,
     add_docs_to_opensearch,
+    add_docs_to_23ai,
 )
 from utils import get_console_logger, enable_tracing, remove_path_from_ref
 
@@ -175,10 +176,10 @@ def load_uploaded_file_in_vector_store(v_uploaded_file):
 
     if VECTOR_STORE_TYPE == "FAISS":
         add_docs_to_faiss(docs, FAISS_DIR, embed_model)
-    if VECTOR_STORE_TYPE == "OPENSEARCH":
+    elif VECTOR_STORE_TYPE == "OPENSEARCH":
         add_docs_to_opensearch(docs, embed_model)
-    if VECTOR_STORE_TYPE == "23AI":
-        logger.info("Functionality not yet implemented!")
+    elif VECTOR_STORE_TYPE == "23AI":
+        add_docs_to_23ai(docs, embed_model)
 
 
 #
