@@ -1,7 +1,10 @@
 """
 Author: Luigi Saetta
 Date created: 2024-04-27
-Date last modified: 2024-05-20
+Date last modified: 2024-05-26
+
+Usage:
+    forked and modified for rfx prototype
 Python Version: 3.11
 """
 
@@ -10,11 +13,15 @@ import logging
 # Cohere
 from langchain_cohere import ChatCohere, CohereRerank, CohereEmbeddings
 from langchain.retrievers import ContextualCompressionRetriever
+from langchain.retrievers.document_compressors import LLMChainExtractor
 
 # to handle conversational memory
 from langchain.chains import create_history_aware_retriever
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
+
+# Added LLMLingua
+from langchain_community.document_compressors import LLMLinguaCompressor
 
 # LLM
 from langchain_community.llms import OCIGenAI
@@ -27,7 +34,7 @@ from oracle_chat_prompts import CONTEXT_Q_PROMPT, QA_PROMPT
 
 from utils import print_configuration, check_value_in_list
 
-from config import (
+from config_rfx import (
     EMBED_MODEL_TYPE,
     OCI_EMBED_MODEL,
     COHERE_EMBED_MODEL,
@@ -40,6 +47,8 @@ from config import (
     TOP_K,
     TOP_N,
     ADD_RERANKER,
+    ADD_LLMLINGUA,
+    ADD_LLM_CHAIN_EXTRACTOR,
     COHERE_RERANKER_MODEL,
     LLM_MODEL_TYPE,
 )
@@ -123,6 +132,9 @@ def build_rag_chain(local_index_dir, books_dir, verbose):
         books_dir=books_dir,
     )
 
+    # moved here for LLMChainExtractor
+    llm = get_llm(model_type=LLM_MODEL_TYPE)
+
     # 10/05: I can add a filter here (for ex: to filter by profile_id)
     base_retriever = v_store.as_retriever(k=TOP_K)
 
@@ -131,18 +143,42 @@ def build_rag_chain(local_index_dir, books_dir, verbose):
         if verbose:
             logger.info("Adding a reranker...")
 
-        cohere_rerank = CohereRerank(
+        compressor = CohereRerank(
             cohere_api_key=COHERE_API_KEY, top_n=TOP_N, model=COHERE_RERANKER_MODEL
         )
 
         retriever = ContextualCompressionRetriever(
-            base_compressor=cohere_rerank, base_retriever=base_retriever
+            base_compressor=compressor, base_retriever=base_retriever
+        )
+    elif ADD_LLMLINGUA:
+        assert ADD_RERANKER is False
+
+        if verbose:
+            logger.info("Adding LLMlingua...")
+
+        # LLMLingua... works even on Mac (mps)
+        # not yet possible to use LLmlingua2
+        # default is Llama2
+        compressor = LLMLinguaCompressor(
+            model_name="openai-community/gpt2", target_token=512, device_map="cpu"
+        )
+
+        retriever = ContextualCompressionRetriever(
+            base_compressor=compressor, base_retriever=base_retriever
+        )
+    elif ADD_LLM_CHAIN_EXTRACTOR:
+        # can be much slower since it dos a LLM query for each doc
+        if verbose:
+            logger.info("Adding LLMChainExtractor...")
+
+        compressor = LLMChainExtractor.from_llm(llm)
+
+        retriever = ContextualCompressionRetriever(
+            base_compressor=compressor, base_retriever=base_retriever
         )
     else:
         # no reranker
         retriever = base_retriever
-
-    llm = get_llm(model_type=LLM_MODEL_TYPE)
 
     # steps to add chat_history
     # 1. create a retriever using chat history

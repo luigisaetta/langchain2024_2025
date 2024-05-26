@@ -35,10 +35,16 @@ COHERE_EMBED_MODEL = "embed-multilingual-v3.0"
 # current endpoint for OCI GenAI (embed and llm) models
 ENDPOINT = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
-# reranker, TRue only to experiment
+# reranker, True only to experiment
 ADD_RERANKER = True
 # only to experiment
 COHERE_RERANKER_MODEL = "rerank-multilingual-v3.0"
+
+# only for rfx, instead of reranker
+ADD_LLMLINGUA = False
+
+# Alterbnative to above
+ADD_LLM_CHAIN_EXTRACTOR = False
 
 # retriever
 TOP_K = 8

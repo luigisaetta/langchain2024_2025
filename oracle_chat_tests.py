@@ -5,7 +5,7 @@ Date last modified: 2024-04-27
 Python Version: 3.11
 """
 
-from factory import get_rag_chain
+from factory import build_rag_chain
 from utils import enable_tracing
 
 from config import ENABLE_TRACING, FAISS_DIR, BOOKS_DIR
@@ -31,7 +31,7 @@ if ENABLE_TRACING:
 #
 # Inizializza l'intera catena
 #
-rag_chain = get_rag_chain(FAISS_DIR, BOOKS_DIR, verbose=True)
+rag_chain = build_rag_chain(FAISS_DIR, BOOKS_DIR, verbose=True)
 
 chat_history = []
 

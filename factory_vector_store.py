@@ -49,9 +49,10 @@ def get_vector_store(
     local_index_dir, books_dir only needed for FAISS
     Faiss: Read or rebuild the index and retur a Vector Store
     """
-    logger = logging.getLogger("ConsoleLogger")
 
     check_value_in_list(vector_store_type, ["FAISS", "OPENSEARCH", "23AI", "QDRANT"])
+
+    logger = logging.getLogger("ConsoleLogger")
 
     v_store = None
 
@@ -67,15 +68,16 @@ def get_vector_store(
             v_store = load_and_rebuild_faiss_index(
                 local_index_dir, books_dir, embed_model
             )
+
     elif vector_store_type == "OPENSEARCH":
         # this assumes that there is an OpenSearch cluster available
         # or docker, at the specified URL
-        # txt+vectors already loaded in
         v_store = OpenSearchVectorSearch(
             embedding_function=embed_model,
             http_auth=(OPENSEARCH_USER, OPENSEARCH_PWD),
             **OPENSEARCH_SHARED_PARAMS,
         )
+
     elif vector_store_type == "23AI":
         dsn = f"{DB_HOST_IP}:1521/{DB_SERVICE}"
 

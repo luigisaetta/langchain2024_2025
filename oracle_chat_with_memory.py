@@ -27,7 +27,7 @@ import tempfile
 import streamlit as st
 from langchain_core.messages import HumanMessage, AIMessage
 
-from factory import get_rag_chain, get_embed_model
+from factory import build_rag_chain, get_embed_model
 from chunk_index_utils import (
     load_book_and_split,
     add_docs_to_faiss,
@@ -75,7 +75,7 @@ def create_chat_engine(verbose=VERBOSE):
     """
     Create the entire RAG chain
     """
-    return get_rag_chain(FAISS_DIR, BOOKS_DIR, verbose=verbose)
+    return build_rag_chain(FAISS_DIR, BOOKS_DIR, verbose=verbose)
 
 
 def format_references(v_docs):
@@ -217,7 +217,7 @@ if uploaded_file:
     logger.info("Loaded !")
 
     # reload the rag_chain (do we need?)
-    rag_chain = get_rag_chain(FAISS_DIR, BOOKS_DIR, verbose=False)
+    rag_chain = build_rag_chain(FAISS_DIR, BOOKS_DIR, verbose=False)
 
     uploaded_file = None
 
